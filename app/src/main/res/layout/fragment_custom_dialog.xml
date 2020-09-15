@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/relative"
+    tools:context=".controller.fragment.Custom_DialogFragment">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/txt_title"
+        android:text="Title:"
+        android:textSize="30dp"
+        android:layout_margin="20dp"/>
+    <com.google.android.material.textfield.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/edt_title"
+        android:layout_margin="20dp"
+        android:hint="ارسال تمرین"
+        android:textSize="20dp"
+        android:layout_below="@id/txt_title"/>
+    <com.google.android.material.textfield.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/edt_descript"
+        android:layout_below="@id/edt_title"
+        android:layout_margin="20dp"
+        android:paddingTop="100dp"
+        android:hint="Description" />
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_date"
+        android:layout_below="@id/edt_descript"
+        android:layout_margin="20dp"/>
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_time"
+        android:layout_below="@id/btn_date"
+        android:layout_margin="20dp"/>
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/check_box"
+        android:layout_below="@id/btn_time"
+        android:layout_margin="20dp"/>
+
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_save"
+        android:layout_below="@id/check_box"
+        android:layout_margin="20dp"
+        android:text="@string/Save"
+        android:layout_alignParentLeft="true"
+        />
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_cancel"
+        android:layout_below="@id/check_box"
+        android:layout_alignParentRight="true"
+        android:layout_margin="20dp"
+        android:text="@string/Cancel"/>
+
+
+    </RelativeLayout>
+
+
+
+

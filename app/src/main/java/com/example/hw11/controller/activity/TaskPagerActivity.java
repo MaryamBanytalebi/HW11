@@ -13,8 +13,13 @@ import android.os.Bundle;
 
 import com.example.hw11.R;
 import com.example.hw11.controller.fragment.TaskDetailFragment;
+import com.example.hw11.controller.fragment.doingFragment;
+import com.example.hw11.controller.fragment.doneFragment;
+import com.example.hw11.controller.fragment.todoFragment;
 import com.example.hw11.model.Task;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +27,6 @@ import java.util.List;
 public class TaskPagerActivity extends AppCompatActivity {
     private ViewPager2 mViewPager;
     private TabLayout mTabLayout;
-    private List<Task> tasks;
     public static Intent newIntent(Context context){
         return new Intent(context,TaskPagerActivity.class);
     }
@@ -42,33 +46,59 @@ public class TaskPagerActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        tasks = new ArrayList<>();
-        TaskPagerAdapter adapter = new TaskPagerAdapter(this,tasks);
-        mViewPager.setAdapter(adapter);
-
+        /*tasks = new ArrayList<>();
+        TaskPagerAdapter adapter = new TaskPagerAdapter(this,tasks);*/
+        mViewPager.setAdapter(new TaskPagerAdapter(this));
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(
+                mTabLayout, mViewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+            @Override
+            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                switch (position){
+                    case 0:{
+                        tab.setText("TODO");
+                        break;
+                    }
+                    case 1:{
+                        tab.setText("DOING");
+                        break;
+                    }
+                    case 2:{
+                        tab.setText("DONE");
+                        break;
+                    }
+                }
+            }
+        });
+        tabLayoutMediator.attach();
+        /*mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                BadgeDrawable badgeDrawable = mTabLayout.getTabAt(position).getOrCreateBadge();
+                badgeDrawable.setVisible(false);
+            }
+        });*/
     }
     private class TaskPagerAdapter extends FragmentStateAdapter {
-        private List<Task> mTasks;
         private final int NUM_PAGE = 3;
 
-        public List<Task> getTasks() {
-            return mTasks;
-        }
-
-        public void setTasks(List<Task> tasks) {
-            mTasks = tasks;
-        }
-
-        public TaskPagerAdapter(@NonNull FragmentActivity fragmentActivity,List<Task> tasks) {
+        public TaskPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
             super(fragmentActivity);
-            mTasks = tasks;
         }
 
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            TaskDetailFragment taskDetailFragment = new TaskDetailFragment();
-            return taskDetailFragment;
+            /*TaskDetailFragment taskDetailFragment = new TaskDetailFragment();
+            return taskDetailFragment;*/
+            switch(position){
+                case 0:
+                    return new todoFragment();
+                case 1:
+                    return new doingFragment();
+                default:
+                    return new doneFragment();
+            }
         }
 
         @Override
