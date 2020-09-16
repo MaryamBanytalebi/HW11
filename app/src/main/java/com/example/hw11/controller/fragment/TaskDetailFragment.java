@@ -14,7 +14,7 @@ import com.example.hw11.R;
 import com.example.hw11.model.Task;
 
 public class TaskDetailFragment extends Fragment {
-    private TextView mTaskName;
+    private TextView mTaskTitle;
     private ImageView mTaskImage;
     private Task mTask;
 
@@ -47,13 +47,13 @@ public class TaskDetailFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_task_detail, container, false);
         findViews(view);
-        mTaskName.setText(mTask.getName());
+        mTaskTitle.setText(mTask.getName());
         //mTaskImage.setImageDrawable(mTask.setPhoto(res.drawable.));
         return  view;
     }
 
     private void findViews(View view) {
-        mTaskName = view.findViewById(R.id.task_name);
+        mTaskTitle = view.findViewById(R.id.task_title);
         mTaskImage = view.findViewById(R.id.task_image);
     }
 }

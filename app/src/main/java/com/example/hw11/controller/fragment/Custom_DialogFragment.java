@@ -15,9 +15,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.hw11.R;
+import com.example.hw11.model.Task;
+
+import java.util.Date;
+import java.util.List;
 
 
 public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment {
+    public static final int REQUEST_CODE_DATE_PICKER = 0;
+    public static final int REQUEST_CODE_TIME_PICKER = 1;
     private TextView mTxtTitle;
     private EditText mEdtTitle;
     private EditText mEdtDescript;
@@ -26,6 +32,7 @@ public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment 
     private Button mBtnSave;
     private Button mBtnCancel;
     private CheckBox mCheckbox;
+    private Task mTask;
 
     public Custom_DialogFragment() {
         // Required empty public constructor
@@ -69,15 +76,21 @@ public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment 
     }
 
     private void setListeners() {
-        mBtnTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
         mBtnDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(mTask.getDate());
+                datePickerFragment.setTargetFragment(Custom_DialogFragment.this,
+                        REQUEST_CODE_DATE_PICKER);
+
+            }
+        });
+        mBtnTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(mTask.getDate());
+                timePickerFragment.setTargetFragment(Custom_DialogFragment.this,
+                        REQUEST_CODE_TIME_PICKER);
 
             }
         });
@@ -93,6 +106,11 @@ public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment 
 
             }
         });
+    }
+    void updateCrimeDate(Date userSelectedDate) {
+        mTask.setDate(userSelectedDate);
+        //updateCrime();
+        mBtnDate.setText(mTask.getDate().toString());
     }
 
 }

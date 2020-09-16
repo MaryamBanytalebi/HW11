@@ -1,8 +1,20 @@
 package com.example.hw11.model;
 
-public class Task {
+import java.io.Serializable;
+import java.util.Date;
+
+public class Task implements Serializable {
     private String mName;
     private int mPhoto;
+    private Date mDate;
+
+    public Date getDate() {
+        return mDate;
+    }
+
+    public void setDate(Date date) {
+        mDate = date;
+    }
 
     public String getName() {
         return mName;
