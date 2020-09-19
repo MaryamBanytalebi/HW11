@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import com.example.hw11.R;
 import com.example.hw11.model.Task;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +25,8 @@ import java.util.List;
 public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment {
     public static final int REQUEST_CODE_DATE_PICKER = 0;
     public static final int REQUEST_CODE_TIME_PICKER = 1;
+    public static final String FRAGMENT_TAG_DATE_PICKER = "date picker";
+    public static final String FRAGMENT_TAG_TIME_PICKER = "time picker";
     private TextView mTxtTitle;
     private EditText mEdtTitle;
     private EditText mEdtDescript;
@@ -83,14 +86,23 @@ public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment 
                 datePickerFragment.setTargetFragment(Custom_DialogFragment.this,
                         REQUEST_CODE_DATE_PICKER);
 
+                datePickerFragment.show(
+                        getActivity().getSupportFragmentManager(),
+                        FRAGMENT_TAG_DATE_PICKER);
+
             }
         });
+
         mBtnTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(mTask.getDate());
                 timePickerFragment.setTargetFragment(Custom_DialogFragment.this,
                         REQUEST_CODE_TIME_PICKER);
+
+                timePickerFragment.show(
+                        getActivity().getSupportFragmentManager(),
+                        FRAGMENT_TAG_TIME_PICKER);
 
             }
         });

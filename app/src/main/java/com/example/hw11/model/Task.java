@@ -2,11 +2,14 @@ package com.example.hw11.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
-public class Task implements Serializable {
-    private String mName;
-    private int mPhoto;
+public class Task {
+    private String mTitle;
+    private String Description;
+    private String mState;
     private Date mDate;
+    private UUID mId;
 
     public Date getDate() {
         return mDate;
@@ -16,19 +19,43 @@ public class Task implements Serializable {
         mDate = date;
     }
 
-    public String getName() {
-        return mName;
+    public String getTitle() {
+        return mTitle;
     }
 
-    public void setName(String name) {
-        mName = name;
+    public void setTitle(String title) {
+        mTitle = title;
     }
 
-    public int getPhoto() {
-        return mPhoto;
+    public String getDescription() {
+        return Description;
     }
 
-    public void setPhoto(int photo) {
-        mPhoto = photo;
+    public void setDescription(String description) {
+        Description = description;
+    }
+
+    public String getState() {
+        return mState;
+    }
+
+    public void setState(String state) {
+        mState = state;
+    }
+
+    public UUID getId() {
+        return mId;
+    }
+
+    public void setId(UUID id) {
+        mId = id;
+    }
+
+    public Task(String title, String description, String state, Date date) {
+        mTitle = title;
+        Description = description;
+        mState = state;
+        mDate = date;
+        mId = UUID.randomUUID();
     }
 }

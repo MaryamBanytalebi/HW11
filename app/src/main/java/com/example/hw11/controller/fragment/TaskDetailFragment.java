@@ -14,10 +14,6 @@ import com.example.hw11.R;
 import com.example.hw11.model.Task;
 
 public class TaskDetailFragment extends Fragment {
-    private TextView mTaskTitle;
-    private ImageView mTaskImage;
-    private Task mTask;
-
 
     // TODO: Rename and change types of parameters
 
@@ -46,14 +42,7 @@ public class TaskDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_task_detail, container, false);
-        findViews(view);
-        mTaskTitle.setText(mTask.getName());
-        //mTaskImage.setImageDrawable(mTask.setPhoto(res.drawable.));
         return  view;
     }
 
-    private void findViews(View view) {
-        mTaskTitle = view.findViewById(R.id.task_title);
-        mTaskImage = view.findViewById(R.id.task_image);
-    }
 }
