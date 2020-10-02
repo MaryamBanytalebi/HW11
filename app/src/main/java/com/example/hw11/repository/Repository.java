@@ -1,4 +1,4 @@
-package com.example.hw11;
+package com.example.hw11.repository;
 
 import com.example.hw11.model.Task;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Repository {
+public class Repository implements IRepositry{
     private static Repository sInstance;
     private List<Task> mTasks;
 
