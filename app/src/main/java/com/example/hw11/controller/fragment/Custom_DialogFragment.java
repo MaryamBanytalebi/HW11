@@ -1,7 +1,9 @@
 package com.example.hw11.controller.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,20 +11,25 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 
 import com.example.hw11.R;
 import com.example.hw11.model.Task;
+import com.example.hw11.repository.Repository;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 
-public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment {
+public class Custom_DialogFragment extends DialogFragment {
     public static final int REQUEST_CODE_DATE_PICKER = 0;
     public static final int REQUEST_CODE_TIME_PICKER = 1;
     public static final String FRAGMENT_TAG_DATE_PICKER = "date picker";
@@ -34,8 +41,10 @@ public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment 
     private Button mBtnDate;
     private Button mBtnSave;
     private Button mBtnCancel;
-    private CheckBox mCheckbox;
+    private RadioButton mRadioDoing,mRadioTodo,mRadioDone;
     private Task mTask;
+    private Calendar mCalendar;
+    private Repository mRepository;
 
     public Custom_DialogFragment() {
         // Required empty public constructor
@@ -75,7 +84,9 @@ public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment 
         mBtnTime = view.findViewById(R.id.btn_time);
         mBtnSave = view.findViewById(R.id.btn_save);
         mBtnCancel = view.findViewById(R.id.btn_cancel);
-        mCheckbox = view.findViewById(R.id.check_box);
+        mRadioDoing = view.findViewById(R.id.Radio_doing);
+        mRadioDone = view.findViewById(R.id.Radio_done);
+        mRadioTodo = view.findViewById(R.id.Radio_todo);
     }
 
     private void setListeners() {
@@ -109,16 +120,64 @@ public class Custom_DialogFragment extends androidx.fragment.app.DialogFragment 
         mBtnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(validInput()){
+                    sendResult();
+                    updateTasks(mTask);
+                    dismiss();
+                }
+                else{
+                    Toast toast = Toast.makeText(getActivity(), "enter data", Toast.LENGTH_SHORT);
+                    toast.show();
+
+                }
 
             }
         });
         mBtnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                dismiss();
             }
         });
     }
+
+    private boolean validInput() {
+        if (mEdtTitle.getText() != null && mEdtDescript.getText() != null
+                && mBtnDate.getText() != null && mBtnTime.getText() != null
+                && mRadioDoing.isChecked() || mRadioDone.isChecked() || mRadioTodo.isChecked())
+            return true;
+        else
+            return false;
+    }
+
+    private void sendResult() {
+        Fragment fragment = getTargetFragment();
+        int requestCode = getTargetRequestCode();
+        int resultCode = Activity.RESULT_OK;
+        Intent intent = new Intent();
+        createTask();
+        updateTasks(mTask);
+        /* extractTask();*/
+//        intent.putExtra(EXTRA_USER_SELECTED_DATE, userSelectedTask);
+
+        fragment.onActivityResult(requestCode, resultCode, intent);
+    }
+
+    private void createTask(){
+        String state = "";
+        if (mRadioTodo.isChecked())
+            state = "Todo";
+        else if (mRadioDoing.isChecked())
+            state = "Doing";
+        else if (mRadioDone.isChecked())
+            state = "Done";
+        mTask = new Task(mEdtTitle.getText().toString(),mEdtDescript.getText().toString(),state,mCalendar.getTime());
+    }
+
+    private void updateTasks(Task task) {
+        mRepository.insertTask(task);
+    }
+
     void updateCrimeDate(Date userSelectedDate) {
         mTask.setDate(userSelectedDate);
         //updateCrime();

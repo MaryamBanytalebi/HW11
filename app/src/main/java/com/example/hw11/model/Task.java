@@ -58,4 +58,6 @@ public class Task {
         mDate = date;
         mId = UUID.randomUUID();
     }
+
+    public Task(){ }
 }

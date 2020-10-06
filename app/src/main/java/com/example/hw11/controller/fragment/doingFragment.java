@@ -13,10 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.amulyakhare.textdrawable.TextDrawable;
 import com.example.hw11.R;
 import com.example.hw11.model.Task;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.internal.TextDrawableHelper;
 
 import java.text.DateFormat;
@@ -26,8 +29,10 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class doingFragment extends Fragment {
-    private ImageButton mAdd_doing;
+    private FloatingActionButton mAdd_doing;
     private RecyclerView mRecyclerViewDoing;
+    private RelativeLayout mLayoutEmptyDoing;
+    private List<Task> mTasks;
 
 
     public doingFragment() {
@@ -35,7 +40,7 @@ public class doingFragment extends Fragment {
     }
 
     // TODO: Rename and change types and number of parameters
-    public static doingFragment newInstance(String param1, String param2) {
+    public static doingFragment newInstance() {
         doingFragment fragment = new doingFragment();
         Bundle args = new Bundle();
         //args.putString(ARG_PARAM1, param1);
@@ -80,6 +85,17 @@ public class doingFragment extends Fragment {
     private void findViews(View view) {
         mAdd_doing = view.findViewById(R.id.add_button_doing);
         mRecyclerViewDoing = view.findViewById(R.id.recycler_doing);
+        mLayoutEmptyDoing = view.findViewById(R.id.layout_empty);
+    }
+
+    private void checkEmptyLayout(){
+        if (mTasks.size() == 0){
+            mLayoutEmptyDoing.setVisibility(View.VISIBLE);
+        }
+        else {
+            mLayoutEmptyDoing.setVisibility(View.GONE);
+        }
+
     }
 
     private class TaskHolder extends RecyclerView.ViewHolder{
@@ -90,11 +106,11 @@ public class doingFragment extends Fragment {
 
         public TaskHolder(@NonNull View itemView) {
             super(itemView);
-            mTxtTitle = itemView.findViewById(R.id.txt_title);
-            mTxtDate = itemView.findViewById(R.id.txt_date);
+            mTxtTitle = itemView.findViewById(R.id.task_title);
+            mTxtDate = itemView.findViewById(R.id.task_date);
             mImageTask = itemView.findViewById(R.id.task_image);
 
-            /*itemView.setOnClickListener(new View.OnClickListener() {
+           /* itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
@@ -108,9 +124,9 @@ public class doingFragment extends Fragment {
             String date = createDateFormat(task);
             mTxtDate.setText(date);
             String string = task.getTitle().substring(0,1);
-            /*TextDrawable drawable = TextDrawable.builder()
+            TextDrawable drawable = TextDrawable.builder()
                     .buildRound(string, Color.RED);
-            mImageTask.setImageDrawable(drawable);*/
+            mImageTask.setImageDrawable(drawable);
         }
         private DateFormat getDateFormat() {
             return new SimpleDateFormat("MMM dd,yyyy");
@@ -141,6 +157,10 @@ public class doingFragment extends Fragment {
         }
 
         public void setTasks(List<Task> tasks) {
+            mTasks = tasks;
+        }
+
+        public TaskAdapter(List<Task> tasks) {
             mTasks = tasks;
         }
 
