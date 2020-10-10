@@ -11,4 +11,7 @@ public interface IRepositry {
     void insertTask(Task task);
     void deletTask(Task task);
     void updateTask(Task task);
+    List<Task> searchTasks(String searchValue);
+
+
 }

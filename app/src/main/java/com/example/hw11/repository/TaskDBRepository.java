@@ -59,4 +59,10 @@ public class TaskDBRepository implements IRepositry {
     public void updateTask(Task task) {
 
     }
+
+    public List<Task> searchTasks(String searchValue) {
+       // return mTaskDAO.searchTasks(searchValue);
+        return null;
+    }
+
 }

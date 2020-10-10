@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -24,8 +25,11 @@ import com.example.hw11.R;
 import com.example.hw11.model.Task;
 import com.example.hw11.repository.Repository;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 
@@ -34,6 +38,10 @@ public class Custom_DialogFragment extends DialogFragment {
     public static final int REQUEST_CODE_TIME_PICKER = 1;
     public static final String FRAGMENT_TAG_DATE_PICKER = "date picker";
     public static final String FRAGMENT_TAG_TIME_PICKER = "time picker";
+    public static final String EXTRA_USER_SELECTED_DATE = "user salected date";
+    public static final String BUNDLE_KEY_TIME = "time";
+    public static final String BUNDLE_KEY_DATE = "date";
+    private DatePicker mDatePicker;
     private TextView mTxtTitle;
     private EditText mEdtTitle;
     private EditText mEdtDescript;
@@ -74,6 +82,28 @@ public class Custom_DialogFragment extends DialogFragment {
         setListeners();
         AlertDialog dialog = builder.create();
         return dialog;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode != Activity.RESULT_OK || data == null)
+            return;
+        if (requestCode == REQUEST_CODE_DATE_PICKER){
+            Calendar userSelectedDate = (Calendar) data.getSerializableExtra(DatePickerFragment.EXTRA_USER_SELECTED_DATE);
+            updateTaskDate(userSelectedDate.getTime());
+        }
+        else if (requestCode == REQUEST_CODE_TIME_PICKER){
+            Calendar userSelectedTime = (Calendar) data.getSerializableExtra(TimePickerFragment.EXTRA_USER_SELECTED_TIME);
+            updateTaskTime(userSelectedTime.getTime());
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(BUNDLE_KEY_TIME,mBtnTime.getText().toString());
+        outState.putString(BUNDLE_KEY_DATE,mBtnDate.getText().toString());
+
     }
 
     private void findViews(View view) {
@@ -157,8 +187,8 @@ public class Custom_DialogFragment extends DialogFragment {
         Intent intent = new Intent();
         createTask();
         updateTasks(mTask);
-        /* extractTask();*/
-//        intent.putExtra(EXTRA_USER_SELECTED_DATE, userSelectedTask);
+        //extractDateFromDatePicker();
+        //intent.putExtra(EXTRA_USER_SELECTED_DATE, userSelectedDate);
 
         fragment.onActivityResult(requestCode, resultCode, intent);
     }
@@ -178,10 +208,38 @@ public class Custom_DialogFragment extends DialogFragment {
         mRepository.insertTask(task);
     }
 
-    void updateCrimeDate(Date userSelectedDate) {
-        mTask.setDate(userSelectedDate);
-        //updateCrime();
-        mBtnDate.setText(mTask.getDate().toString());
+    public void updateTaskTime(Date userSelectedTime){
+       Calendar calendar = Calendar.getInstance();
+       calendar.setTime(userSelectedTime);
+       int hour = calendar.get(Calendar.HOUR_OF_DAY);
+       int minute = calendar.get(Calendar.MINUTE);
+       mCalendar.set(Calendar.HOUR_OF_DAY,hour);
+       mCalendar.set(Calendar.MINUTE,minute);
+       DateFormat timeFormat = getTimeFormat();
+       mBtnTime.setText(timeFormat.format(userSelectedTime));
+    }
+
+    public void updateTaskDate(Date userSelectedDate){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(userSelectedDate);
+        int year = calendar.get(Calendar.YEAR);
+        int monthOfYear = calendar.get(Calendar.MONTH);
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        mCalendar.set(Calendar.YEAR,year);
+        mCalendar.set(Calendar.MONTH,monthOfYear);
+        mCalendar.set(Calendar.DAY_OF_MONTH,dayOfMonth);
+        DateFormat dateFormat = getDateFormat();
+        mBtnDate.setText(dateFormat.format(userSelectedDate));
+    }
+
+    private DateFormat getDateFormat() {
+        //"yyyy/MM/dd"
+        return new SimpleDateFormat("MMM dd,yyyy");
+    }
+
+    private DateFormat getTimeFormat() {
+        //"HH:mm:ss"
+        return new SimpleDateFormat("h:mm a");
     }
 
 }

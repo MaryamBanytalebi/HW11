@@ -1,8 +1,10 @@
 package com.example.hw11.controller.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -19,14 +21,17 @@ import android.widget.TimePicker;
 
 import com.example.hw11.R;
 
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class TimePickerFragment extends DialogFragment {
     public static final String ARG_TASK_TIME = "task time";
+    public static final String EXTRA_USER_SELECTED_TIME= "user select time";
     private TimePicker mTimePicker;
     private Date mTaskTime;
+    private Calendar mCalendar;
 
     public TimePickerFragment() {
         // Required empty public constructor
@@ -44,6 +49,7 @@ public class TimePickerFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTaskTime = (Date) getArguments().getSerializable(ARG_TASK_TIME);
+        mCalendar = Calendar.getInstance();
     }
 
     @NonNull
@@ -55,51 +61,50 @@ public class TimePickerFragment extends DialogFragment {
         initViews();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setTitle("time of task:")
                 .setView(view)
-                .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                int hour = mTimePicker.getCurrentHour();
-                int minute = mTimePicker.getCurrentMinute();
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR,hour);
-                calendar.set(Calendar.MINUTE,minute);
-
-                Date userSelectedDate = calendar.getTime();
-
-                Fragment fragment = getTargetFragment();
-                if (fragment != null && fragment instanceof Custom_DialogFragment){
-                    Custom_DialogFragment custom_dialogFragment =
-                            (Custom_DialogFragment) fragment;
-
-                    custom_dialogFragment.updateCrimeDate(userSelectedDate);
-                }
+                extractDateFromDatePicker();
+                sendResult(mCalendar);
             }
-        });
+        })
+                .setNegativeButton(android.R.string.cancel,null);
         AlertDialog dialog = builder.create();
         return dialog;
     }
-
-     /* @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_time_picker, container, false);
-        findViews(view);
-        return view;
-    }*/
 
     private void initViews() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(mTaskTime);
         int hour = calendar.get(Calendar.HOUR);
         int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
+        mTimePicker.setCurrentHour(hour);
+        mTimePicker.setCurrentMinute(minute);
     }
 
     private void findViews(View view) {
         mTimePicker = view.findViewById(R.id.time_picker);
+    }
+
+    private void extractDateFromDatePicker(){
+        int hour = mTimePicker.getCurrentHour();
+        int minute = mTimePicker.getCurrentMinute();
+
+        mCalendar.set(Calendar.HOUR,hour);
+        mCalendar.set(Calendar.MINUTE,minute);
+    }
+
+    private void sendResult(Calendar userSelectedDate){
+        Fragment fragment = getTargetFragment();
+        int requestCode = getTargetRequestCode();
+        int resultCode = Activity.RESULT_OK;
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_USER_SELECTED_TIME, userSelectedDate);
+
+        fragment.onActivityResult(requestCode,resultCode,intent);
+
+
     }
 }

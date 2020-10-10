@@ -26,17 +26,22 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class todoFragment extends Fragment {
+
     private FloatingActionButton mAdd_todo;
-    private RelativeLayout mLayoutEmpty;
     private RecyclerView mRecyclerViewTodo;
+    private RelativeLayout mLayoutEmptyTodo;
+    public static final int REQUEST_CODE_EDIT_TASK_TODO = 3;
+    public static final String FRAGMENT_TAG_EDIT_TASK_TODO = "EditTaskTodo";
     private List<Task> mTasks;
+    private todoFragment.TaskAdapter mTaskAdapter;
+
 
     public todoFragment() {
         // Required empty public constructor
     }
 
     // TODO: Rename and change types and number of parameters
-    public static todoFragment newInstance(String param1, String param2) {
+    public static todoFragment newInstance() {
         todoFragment fragment = new todoFragment();
         Bundle args = new Bundle();
         //args.putString(ARG_PARAM1, param1);
@@ -56,11 +61,17 @@ public class todoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_todo, container, false);
+        View view = inflater.inflate(R.layout.fragment_doing, container, false);
         findViews(view);
+        initViews();
         setListeners();
-        inintViews();
+        checkEmptyLayout();
         return view;
+    }
+
+    private void initViews() {
+        mRecyclerViewTodo.setLayoutManager(new LinearLayoutManager(getActivity()));
+        updateUI();
     }
 
     private void setListeners() {
@@ -77,11 +88,29 @@ public class todoFragment extends Fragment {
     private void findViews(View view) {
         mAdd_todo = view.findViewById(R.id.add_button_todo);
         mRecyclerViewTodo = view.findViewById(R.id.recycler_todo);
-        mLayoutEmpty = view.findViewById(R.id.layout_empty);
+        mLayoutEmptyTodo = view.findViewById(R.id.layout_empty);
     }
 
-    private void inintViews(){
-        mRecyclerViewTodo.setLayoutManager(new LinearLayoutManager(getActivity()));
+    private void checkEmptyLayout(){
+        if (mTasks.size() == 0){
+            mLayoutEmptyTodo.setVisibility(View.VISIBLE);
+        }
+        else {
+            mLayoutEmptyTodo.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateUI() {
+
+        checkEmptyLayout();
+        if (mTaskAdapter == null) {
+            mTaskAdapter = new todoFragment.TaskAdapter(mTasks);
+            mRecyclerViewTodo.setAdapter(mTaskAdapter);
+        }
+        else {
+            mTaskAdapter.setTasks(mTasks);
+            mTaskAdapter.notifyDataSetChanged();
+        }
     }
 
     private class TaskHolder extends RecyclerView.ViewHolder{
@@ -96,13 +125,20 @@ public class todoFragment extends Fragment {
             mTxtDate = itemView.findViewById(R.id.task_date);
             mImageTask = itemView.findViewById(R.id.task_image);
 
-            /*itemView.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    EditTaskFragment editTaskFragment = EditTaskFragment.newInstance(mTask.getId());
+                    editTaskFragment.setTargetFragment(todoFragment.this,REQUEST_CODE_EDIT_TASK_TODO);
+
+                    editTaskFragment.show(
+                            getActivity().getSupportFragmentManager(),
+                            FRAGMENT_TAG_EDIT_TASK_TODO);
 
                 }
-            });*/
+            });
         }
+
         public void bindTask(Task task) {
             mTask = task;
             mTxtTitle.setText(task.getTitle());
@@ -112,8 +148,7 @@ public class todoFragment extends Fragment {
             TextDrawable drawable = TextDrawable.builder()
                     .buildRound(string, Color.RED);
             mImageTask.setImageDrawable(drawable);
-    }
-
+        }
         private DateFormat getDateFormat() {
             return new SimpleDateFormat("MMM dd,yyyy");
         }
@@ -121,7 +156,7 @@ public class todoFragment extends Fragment {
         private DateFormat getTimeFormat() {
             return new SimpleDateFormat("h:mm a");
         }
-        private String createDateFormat (Task task) {
+        private String createDateFormat (Task task){
             String totalDate = "";
             DateFormat dateFormat = getDateFormat();
             String date = dateFormat.format(task.getDate());
@@ -133,9 +168,10 @@ public class todoFragment extends Fragment {
 
             return totalDate;
         }
+    }
 
-    private class TaskAdapter extends RecyclerView.Adapter<TaskHolder>{
-            private List<Task> mTasks;
+    private class TaskAdapter extends RecyclerView.Adapter<todoFragment.TaskHolder>{
+        private List<Task> mTasks;
 
         public List<Task> getTasks() {
             return mTasks;
@@ -151,23 +187,25 @@ public class todoFragment extends Fragment {
 
         @NonNull
         @Override
-        public TaskHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public todoFragment.TaskHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            View view = layoutInflater.inflate(R.layout.fragment_task_detail, parent ,false);
-            TaskHolder taskHolder = new TaskHolder(view);
+            View view = layoutInflater.inflate(R.layout.fragment_task_detail,parent,false);
+            TaskHolder taskHolder = new todoFragment.TaskHolder(view);
             return taskHolder;
         }
 
         @Override
-        public void onBindViewHolder(@NonNull TaskHolder holder, int position) {
+        public void onBindViewHolder(@NonNull todoFragment.TaskHolder holder, int position) {
             Task task = mTasks.get(position);
+
             holder.bindTask(task);
+
         }
 
         @Override
         public int getItemCount() {
             return mTasks.size();
         }
-      }
+
     }
 }

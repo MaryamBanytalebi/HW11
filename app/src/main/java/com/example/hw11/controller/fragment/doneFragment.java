@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -30,7 +32,11 @@ public class doneFragment extends Fragment {
     private FloatingActionButton mAdd_done;
     private RelativeLayout mLayoutEmptyDone;
     private RecyclerView mRecyclerViewDone;
+    public static final int REQUEST_CODE_EDIT_TASK_DONE = 2;
+    public static final String FRAGMENT_TAG_EDIT_TASK_DONE = "EditTaskDone";
+
     private List<Task> mTasks;
+    private taskAdapter mAdapter;
 
     public doneFragment() {
         // Required empty public constructor
@@ -91,7 +97,21 @@ public class doneFragment extends Fragment {
     }
     private void initViews(){
         mRecyclerViewDone.setLayoutManager(new LinearLayoutManager(getActivity()));
+        updateUI();
 
+    }
+
+    private void updateUI() {
+
+        checkEmptyLayout();
+        if (mAdapter == null) {
+            mAdapter = new taskAdapter(mTasks);
+            mRecyclerViewDone.setAdapter(mAdapter);
+        }
+        else {
+            mAdapter.setTasks(mTasks);
+            mAdapter.notifyDataSetChanged();
+        }
     }
     private class TaskHolder extends RecyclerView.ViewHolder{
         private TextView mTxtTitle;
@@ -104,13 +124,18 @@ public class doneFragment extends Fragment {
             mTxtTitle = itemView.findViewById(R.id.task_title);
             mTxtDate = itemView.findViewById(R.id.task_date);
             mImageTask = itemView.findViewById(R.id.task_image);
-            //to do
-            /*itemView.setOnClickListener(new View.OnClickListener() {
+
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    EditTaskFragment editTaskFragment = EditTaskFragment.newInstance(mTask.getId());
+                    editTaskFragment.setTargetFragment(doneFragment.this,REQUEST_CODE_EDIT_TASK_DONE);
 
+                    editTaskFragment.show(
+                            getActivity().getSupportFragmentManager(),
+                            FRAGMENT_TAG_EDIT_TASK_DONE);
                 }
-            });*/
+            });
         }
         private void bindTask(Task task) {
             mTxtTitle.setText(task.getTitle());
@@ -151,6 +176,10 @@ public class doneFragment extends Fragment {
         }
 
         public void setTasks(List<Task> tasks) {
+            mTasks = tasks;
+        }
+
+        public taskAdapter(List<Task> tasks) {
             mTasks = tasks;
         }
 

@@ -25,6 +25,7 @@ import com.google.android.material.internal.TextDrawableHelper;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -32,7 +33,10 @@ public class doingFragment extends Fragment {
     private FloatingActionButton mAdd_doing;
     private RecyclerView mRecyclerViewDoing;
     private RelativeLayout mLayoutEmptyDoing;
+    public static final int REQUEST_CODE_EDIT_TASK_DOING = 1;
+    public static final String FRAGMENT_TAG_EDIT_TASK_DOING = "EditTaskDoing";
     private List<Task> mTasks;
+    private TaskAdapter mTaskAdapter;
 
 
     public doingFragment() {
@@ -64,11 +68,13 @@ public class doingFragment extends Fragment {
         findViews(view);
         initViews();
         setListeners();
+        checkEmptyLayout();
         return view;
     }
 
     private void initViews() {
         mRecyclerViewDoing.setLayoutManager(new LinearLayoutManager(getActivity()));
+        updateUI();
     }
 
     private void setListeners() {
@@ -95,7 +101,19 @@ public class doingFragment extends Fragment {
         else {
             mLayoutEmptyDoing.setVisibility(View.GONE);
         }
+    }
 
+    private void updateUI() {
+
+        checkEmptyLayout();
+        if (mTaskAdapter == null) {
+            mTaskAdapter = new doingFragment.TaskAdapter(mTasks);
+            mRecyclerViewDoing.setAdapter(mTaskAdapter);
+        }
+        else {
+            mTaskAdapter.setTasks(mTasks);
+            mTaskAdapter.notifyDataSetChanged();
+        }
     }
 
     private class TaskHolder extends RecyclerView.ViewHolder{
@@ -110,12 +128,18 @@ public class doingFragment extends Fragment {
             mTxtDate = itemView.findViewById(R.id.task_date);
             mImageTask = itemView.findViewById(R.id.task_image);
 
-           /* itemView.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    EditTaskFragment editTaskFragment = EditTaskFragment.newInstance(mTask.getId());
+                    editTaskFragment.setTargetFragment(doingFragment.this,REQUEST_CODE_EDIT_TASK_DOING);
+
+                    editTaskFragment.show(
+                            getActivity().getSupportFragmentManager(),
+                            FRAGMENT_TAG_EDIT_TASK_DOING);
 
                 }
-            });*/
+            });
         }
 
         public void bindTask(Task task) {
@@ -169,8 +193,8 @@ public class doingFragment extends Fragment {
         public TaskHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View view = layoutInflater.inflate(R.layout.fragment_task_detail,parent,false);
-            TaskHolder tabsHolder = new TaskHolder(view);
-            return tabsHolder;
+            TaskHolder taskHolder = new TaskHolder(view);
+            return taskHolder;
         }
 
         @Override

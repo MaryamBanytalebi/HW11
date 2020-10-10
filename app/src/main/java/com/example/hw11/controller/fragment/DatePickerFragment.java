@@ -1,8 +1,10 @@
 package com.example.hw11.controller.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,18 +26,15 @@ import java.util.GregorianCalendar;
 
 public class DatePickerFragment extends DialogFragment {
     public static final String ARG_TASK_DATE = "task date";
+    public static final String EXTRA_USER_SELECTED_DATE = "user select date";
     private Date mTaskDate;
     private DatePicker mDatePicker;
-
-    //private static final String ARG_PARAM1 = "param1";
-
-    //private String mParam1;
+    private Calendar mCalendar;
 
     public DatePickerFragment() {
         // Required empty public constructor
     }
 
-    // TODO: Rename and change types and number of parameters
     public static DatePickerFragment newInstance(Date taskDate) {
         DatePickerFragment fragment = new DatePickerFragment();
         Bundle args = new Bundle();
@@ -48,7 +47,7 @@ public class DatePickerFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTaskDate = (Date) getArguments().getSerializable(ARG_TASK_DATE);
-
+        mCalendar = Calendar.getInstance();
     }
 
     @NonNull
@@ -60,40 +59,19 @@ public class DatePickerFragment extends DialogFragment {
         initViews();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setTitle("date of task:")
                 .setView(view)
                 .setPositiveButton("ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        int year = mDatePicker.getYear();
-                        int month = mDatePicker.getMonth();
-                        int dayOfMonth = mDatePicker.getDayOfMonth();
-
-                        GregorianCalendar gregorianCalendar = new GregorianCalendar(year,month,dayOfMonth);
-                        Date userSelectedDate = gregorianCalendar.getTime();
-                        Fragment fragment = getTargetFragment();
-                        if (fragment != null && fragment instanceof Custom_DialogFragment){
-                            Custom_DialogFragment custom_dialogFragment =
-                                    (Custom_DialogFragment) fragment;
-
-                            custom_dialogFragment.updateCrimeDate(userSelectedDate);
-                        }
-
+                        extractDateFromDatePicker();
+                        sendResult(mCalendar);
                     }
-                });
-        AlertDialog dialog = builder.create();
-        return dialog ;
-
+                })
+                .setNegativeButton("cancle",null);
+                AlertDialog dialog = builder.create();
+                return dialog;
     }
-
-   /* @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_date_picker, container, false);
-        findViews(view);
-        initViews();
-        return view;
-    }*/
 
     private void initViews() {
         Calendar calender = Calendar.getInstance();
@@ -106,5 +84,27 @@ public class DatePickerFragment extends DialogFragment {
 
     private void findViews(View view) {
         mDatePicker = view.findViewById(R.id.date_picker);
+    }
+
+    private void extractDateFromDatePicker(){
+        int year = mDatePicker.getYear();
+        int month = mDatePicker.getMonth();
+        int dayOfMonth = mDatePicker.getDayOfMonth();
+
+        mCalendar.set(Calendar.YEAR,year);
+        mCalendar.set(Calendar.MONTH,month);
+        mCalendar.set(Calendar.DAY_OF_MONTH,dayOfMonth);
+    }
+
+    private void sendResult(Calendar userSelectedDate){
+        Fragment fragment = getTargetFragment();
+        int requestCode = getTargetRequestCode();
+        int resultCode = Activity.RESULT_OK;
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_USER_SELECTED_DATE, userSelectedDate);
+
+        fragment.onActivityResult(requestCode,resultCode,intent);
+
+
     }
 }
