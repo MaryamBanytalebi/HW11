@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ShareCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
@@ -13,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
@@ -50,6 +52,8 @@ public class EditTaskFragment extends DialogFragment {
     private Calendar mCalendar;
     private String mDate, mTime;
     private boolean mFlag;
+    private String mState;
+    private ImageView mImageViewShare;
 
     public EditTaskFragment() {
         // Required empty public constructor
@@ -125,6 +129,8 @@ public class EditTaskFragment extends DialogFragment {
         mTodo = view.findViewById(R.id.radioBtn_todo_edit);
         mDoing = view.findViewById(R.id.radioBtn_doing_edit);
         mDone = view.findViewById(R.id.radioBtn_done_edit);
+        mImageViewShare = view.findViewById(R.id.share);
+
     }
 
     private void setData(Task task){
@@ -138,12 +144,15 @@ public class EditTaskFragment extends DialogFragment {
         DateFormat timeFormat = getTimeFormat();
         mButtonTime.setText(timeFormat.format(task.getDate()));
         mButtonTime.setEnabled(false);
-        if (task.getState().equalsIgnoreCase("Todo"))
+        if (task.getState().equalsIgnoreCase("Todo")){
             mTodo.setChecked(true);
-        else if (task.getState().equalsIgnoreCase("Doing"))
+            mState = "Todo";}
+        else if (task.getState().equalsIgnoreCase("Doing")){
             mDoing.setChecked(true);
-        else if (task.getState().equalsIgnoreCase("Done"))
+            mState = "Doing";}
+        else if (task.getState().equalsIgnoreCase("Done")){
             mDone.setChecked(true);
+            mState  ="Done";}
         mTodo.setEnabled(false);
         mDoing.setEnabled(false);
         mDone.setEnabled(false);
@@ -215,6 +224,48 @@ public class EditTaskFragment extends DialogFragment {
             public void onClick(View v) {
                 mRepository.deletTask(mTask);
                 dismiss();
+            }
+        });
+
+        mImageViewShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mImageViewShare.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        shareIntent();
+                    }
+                });
+            }
+
+            private void shareIntent() {
+
+                ShareCompat.IntentBuilder intentBuilder = ShareCompat.IntentBuilder.from(getActivity());
+                Intent intent = intentBuilder
+                        .setType("text/plain")
+                        .setText(shareWord())
+                        .setChooserTitle(getString(R.string.share))
+                        .createChooserIntent();
+
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+
+            private String shareWord() {
+                String title = mTask.getTitle();
+                String description = mTask.getDescription();
+                String date = mTask.getDate().toString();
+                String state = mState;
+
+                String shareMassage = getString(
+                        R.string.shareMassage,
+                        title,
+                        description,
+                        date,
+                        state);
+
+                return shareMassage;
             }
         });
     }

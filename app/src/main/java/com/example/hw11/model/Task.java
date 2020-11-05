@@ -79,5 +79,8 @@ public class Task {
         mId = UUID.randomUUID();
     }
 
-    public Task(){ }
+    public Task(){
+        mId=UUID.randomUUID();
+        mDate=new Date();
+    }
 }

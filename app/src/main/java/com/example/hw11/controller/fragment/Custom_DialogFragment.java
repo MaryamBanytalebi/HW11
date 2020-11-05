@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import static android.app.Activity.RESULT_OK;
+
 
 public class Custom_DialogFragment extends DialogFragment {
     public static final int REQUEST_CODE_DATE_PICKER = 0;
@@ -51,8 +53,8 @@ public class Custom_DialogFragment extends DialogFragment {
     private Button mBtnCancel;
     private RadioButton mRadioDoing,mRadioTodo,mRadioDone;
     private Task mTask;
-    private Calendar mCalendar;
-    private Repository mRepository;
+    private Calendar mCalendar = Calendar.getInstance();
+    private Repository mRepository=Repository.getInstance();
 
     public Custom_DialogFragment() {
         // Required empty public constructor
@@ -78,6 +80,7 @@ public class Custom_DialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.fragment_custom_dialog,null);
         builder.setView(view);
+        mTask=new Task();
         findViews(view);
         setListeners();
         AlertDialog dialog = builder.create();
@@ -86,7 +89,7 @@ public class Custom_DialogFragment extends DialogFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode != Activity.RESULT_OK || data == null)
+        if (requestCode != RESULT_OK || data == null)
             return;
         if (requestCode == REQUEST_CODE_DATE_PICKER){
             Calendar userSelectedDate = (Calendar) data.getSerializableExtra(DatePickerFragment.EXTRA_USER_SELECTED_DATE);
@@ -183,14 +186,14 @@ public class Custom_DialogFragment extends DialogFragment {
     private void sendResult() {
         Fragment fragment = getTargetFragment();
         int requestCode = getTargetRequestCode();
-        int resultCode = Activity.RESULT_OK;
+        int resultCode = RESULT_OK;
         Intent intent = new Intent();
         createTask();
         updateTasks(mTask);
         //extractDateFromDatePicker();
         //intent.putExtra(EXTRA_USER_SELECTED_DATE, userSelectedDate);
 
-        fragment.onActivityResult(requestCode, resultCode, intent);
+        getTargetFragment().onActivityResult(getTargetRequestCode(), RESULT_OK, intent);
     }
 
     private void createTask(){

@@ -1,9 +1,12 @@
 package com.example.hw11.controller.fragment;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +22,8 @@ import android.widget.TextView;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.example.hw11.R;
 import com.example.hw11.model.Task;
+import com.example.hw11.repository.IRepositry;
+import com.example.hw11.repository.TaskDBRepository;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.internal.TextDrawableHelper;
 
@@ -33,7 +38,9 @@ public class doingFragment extends Fragment {
     private FloatingActionButton mAdd_doing;
     private RecyclerView mRecyclerViewDoing;
     private RelativeLayout mLayoutEmptyDoing;
-    public static final int REQUEST_CODE_EDIT_TASK_DOING = 1;
+    private IRepositry mRepository;
+    public static final int REQUEST_CODE_EDIT_TASK_DOING = 2;
+    public static final int REQUEST_CODE_INSERT_TASK_DOING= 3;
     public static final String FRAGMENT_TAG_EDIT_TASK_DOING = "EditTaskDoing";
     private List<Task> mTasks;
     private TaskAdapter mTaskAdapter;
@@ -55,9 +62,8 @@ public class doingFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            //mParam1 = getArguments().getString(ARG_PARAM1);
-        }
+        mRepository = TaskDBRepository.getInstance(getActivity());
+
     }
 
     @Override
@@ -72,8 +78,20 @@ public class doingFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode != Activity.RESULT_OK || data == null)
+            return;
+
+        if (requestCode == REQUEST_CODE_INSERT_TASK_DOING || requestCode == REQUEST_CODE_EDIT_TASK_DOING) {
+            updateUI();
+
+        }
+    }
+
     private void initViews() {
         mRecyclerViewDoing.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mTasks = mRepository.getDoingTask();
         updateUI();
     }
 

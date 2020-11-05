@@ -4,8 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import androidx.room.Room;
+
 import com.example.hw11.database.TaskDBHelper;
 import com.example.hw11.database.TaskDBSchema;
+import com.example.hw11.database.TaskDataBase;
+import com.example.hw11.database.TaskDataBaseDAO;
 import com.example.hw11.model.Task;
 import static com.example.hw11.database.TaskDBSchema.TaskTable.Cols;
 
@@ -15,54 +19,70 @@ import java.util.UUID;
 public class TaskDBRepository implements IRepositry {
 
     private static TaskDBRepository sInstance;
-    private SQLiteDatabase mDatabase;
 
-    public static TaskDBRepository getInstance(Context context){
+    private TaskDataBaseDAO mTaskDAO;
+    private Context mContext;
+    private List<Task> mTasks;
+
+    public static TaskDBRepository getInstance(Context context) {
         if (sInstance == null)
             sInstance = new TaskDBRepository(context);
-            return sInstance;
+
+        return sInstance;
     }
 
-    public TaskDBRepository(Context context) {
-        TaskDBHelper taskDBHelper = new TaskDBHelper(context);
-        taskDBHelper.getWritableDatabase();
+    private TaskDBRepository(Context context) {
+        mContext = context.getApplicationContext();
+        TaskDataBase taskDatabase = Room.databaseBuilder(mContext,
+                TaskDataBase.class,
+                "task.db")
+                .allowMainThreadQueries()
+                .build();
+
+        mTaskDAO = taskDatabase.getTaskDatabaseDAO();
     }
 
     @Override
     public List<Task> getTasks() {
-        return null;
+        return mTaskDAO.getTasks();
     }
 
     @Override
-    public Task getTask(UUID id) {
-        return null;
+    public List<Task> searchTasks(String searchValue) {
+        return mTaskDAO.searchTasks(searchValue);
+    }
+
+    @Override
+    public List<Task> getTodoTask() { return mTaskDAO.getTodoTask(); }
+
+    @Override
+    public List<Task> getDoingTask() {
+        return mTaskDAO.getDoingTask();
+    }
+
+    @Override
+    public List<Task> getDoneTask() {
+        return mTaskDAO.getDoneTask();
+    }
+
+    @Override
+    public Task getTask(UUID taskId) {
+        return mTaskDAO.getTask(taskId);
     }
 
     @Override
     public void insertTask(Task task) {
-        ContentValues values = new ContentValues();
-        values.put(Cols.UUID , task.getId().toString());
-        values.put(Cols.TITLE , task.getTitle());
-        values.put(Cols.STATE , task.getState());
-        values.put(Cols.DATE , task.getDate().toString());
-        values.put(Cols.DESCRIPTION , task.getDescription());
-        mDatabase.insert(TaskDBSchema.TaskTable.NAME, null, values);
-
-    }
-
-    @Override
-    public void deletTask(Task task) {
-
+        mTaskDAO.insertTask(task);
     }
 
     @Override
     public void updateTask(Task task) {
-
+        mTaskDAO.updateTask(task);
     }
 
-    public List<Task> searchTasks(String searchValue) {
-       // return mTaskDAO.searchTasks(searchValue);
-        return null;
+    @Override
+    public void deletTask(Task task) {
+        mTaskDAO.deletTask(task);
     }
 
 }

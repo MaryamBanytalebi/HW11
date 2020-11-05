@@ -44,6 +44,26 @@ public class Repository implements IRepositry{
 
     }
 
+    @Override
+    public List<Task> searchTasks(String searchValue) {
+        return null;
+    }
+
+    @Override
+    public List<Task> getTodoTask() {
+        return null;
+    }
+
+    @Override
+    public List<Task> getDoingTask() {
+        return null;
+    }
+
+    @Override
+    public List<Task> getDoneTask() {
+        return null;
+    }
+
     public void deletTask(Task task){
         for (int i = 0; i < mTasks.size(); i++) {
             if (mTasks.get(i).getId().equals(task.getId()));

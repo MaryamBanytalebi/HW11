@@ -1,9 +1,12 @@
 package com.example.hw11.controller.fragment;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +22,8 @@ import android.widget.TextView;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.example.hw11.R;
 import com.example.hw11.model.Task;
+import com.example.hw11.repository.IRepositry;
+import com.example.hw11.repository.TaskDBRepository;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import java.text.DateFormat;
@@ -30,7 +35,9 @@ public class todoFragment extends Fragment {
     private FloatingActionButton mAdd_todo;
     private RecyclerView mRecyclerViewTodo;
     private RelativeLayout mLayoutEmptyTodo;
-    public static final int REQUEST_CODE_EDIT_TASK_TODO = 3;
+    private IRepositry mRepository;
+    public static final int REQUEST_CODE_INSERT_TASK_TODO= 4;
+    public static final int REQUEST_CODE_EDIT_TASK_TODO = 5;
     public static final String FRAGMENT_TAG_EDIT_TASK_TODO = "EditTaskTodo";
     private List<Task> mTasks;
     private todoFragment.TaskAdapter mTaskAdapter;
@@ -52,16 +59,15 @@ public class todoFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            //mParam1 = getArguments().getString(ARG_PARAM1);
-        }
+        mRepository = TaskDBRepository.getInstance(getActivity());
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_doing, container, false);
+        View view = inflater.inflate(R.layout.fragment_todo, container, false);
         findViews(view);
         initViews();
         setListeners();
@@ -69,7 +75,20 @@ public class todoFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode != Activity.RESULT_OK || data == null)
+            return;
+
+        if (requestCode == REQUEST_CODE_INSERT_TASK_TODO || requestCode == REQUEST_CODE_EDIT_TASK_TODO) {
+            updateUI();
+
+        }
+    }
+
     private void initViews() {
+        //mTasks = TaskDBRepository.getInstance(getActivity()).getTasks();
+        mTasks = mRepository.getTodoTask();
         mRecyclerViewTodo.setLayoutManager(new LinearLayoutManager(getActivity()));
         updateUI();
     }
@@ -79,6 +98,7 @@ public class todoFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Custom_DialogFragment dialogFragment = Custom_DialogFragment.newInstance();
+                dialogFragment.setTargetFragment(todoFragment.this, REQUEST_CODE_INSERT_TASK_TODO);
                 dialogFragment.show(getActivity().getSupportFragmentManager(),"add task");
 
             }
@@ -108,6 +128,7 @@ public class todoFragment extends Fragment {
             mRecyclerViewTodo.setAdapter(mTaskAdapter);
         }
         else {
+            mTasks = mRepository.getTodoTask();
             mTaskAdapter.setTasks(mTasks);
             mTaskAdapter.notifyDataSetChanged();
         }
@@ -169,6 +190,7 @@ public class todoFragment extends Fragment {
             return totalDate;
         }
     }
+
 
     private class TaskAdapter extends RecyclerView.Adapter<todoFragment.TaskHolder>{
         private List<Task> mTasks;

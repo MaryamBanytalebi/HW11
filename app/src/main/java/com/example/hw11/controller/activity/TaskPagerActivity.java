@@ -27,7 +27,7 @@ import java.util.List;
 public class TaskPagerActivity extends AppCompatActivity {
     private ViewPager2 mViewPager;
     private TabLayout mTabLayout;
-    public static Intent newIntent(Context context){
+    public static Intent newIntent(Context context,String username){
         return new Intent(context,TaskPagerActivity.class);
     }
 
