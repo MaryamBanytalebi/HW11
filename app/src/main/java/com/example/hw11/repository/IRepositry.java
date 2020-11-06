@@ -2,6 +2,7 @@ package com.example.hw11.repository;
 
 import com.example.hw11.model.Task;
 
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,6 @@ public interface IRepositry {
     List<Task> getTodoTask();
     List<Task> getDoingTask();
     List<Task> getDoneTask();
-
+    File getPhotoFile(Task task);
 
 }

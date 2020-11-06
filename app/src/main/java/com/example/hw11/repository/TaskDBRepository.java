@@ -13,6 +13,7 @@ import com.example.hw11.database.TaskDataBaseDAO;
 import com.example.hw11.model.Task;
 import static com.example.hw11.database.TaskDBSchema.TaskTable.Cols;
 
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,6 +64,15 @@ public class TaskDBRepository implements IRepositry {
     @Override
     public List<Task> getDoneTask() {
         return mTaskDAO.getDoneTask();
+    }
+
+    @Override
+    public File getPhotoFile(Task task) {
+        File filesDir = mContext.getFilesDir();
+
+        // /data/data/com.example.criminalintent/files/IMG_ktui4u544nmkfuy48485.jpg
+        File photoFile = new File(filesDir, task.getPhotoFileName());
+        return photoFile;
     }
 
     @Override

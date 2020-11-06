@@ -83,4 +83,8 @@ public class Task {
         mId=UUID.randomUUID();
         mDate=new Date();
     }
+
+    public String getPhotoFileName() {
+        return "IMG_" + getId().toString() + ".jpg";
+    }
 }

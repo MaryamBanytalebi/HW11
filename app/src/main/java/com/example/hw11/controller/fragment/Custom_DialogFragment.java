@@ -3,8 +3,15 @@ package com.example.hw11.controller.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +19,14 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
@@ -25,6 +34,7 @@ import com.example.hw11.R;
 import com.example.hw11.model.Task;
 import com.example.hw11.repository.Repository;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -43,6 +53,10 @@ public class Custom_DialogFragment extends DialogFragment {
     public static final String EXTRA_USER_SELECTED_DATE = "user salected date";
     public static final String BUNDLE_KEY_TIME = "time";
     public static final String BUNDLE_KEY_DATE = "date";
+    private static final int REQUEST_CODE_IMAGE_CAPTURE = 2;
+    public static final String TAG = "ETF";
+    public static final String AUTHORITY = "com.example.hw11.fileProvider";
+
     private DatePicker mDatePicker;
     private TextView mTxtTitle;
     private EditText mEdtTitle;
@@ -52,6 +66,9 @@ public class Custom_DialogFragment extends DialogFragment {
     private Button mBtnSave;
     private Button mBtnCancel;
     private RadioButton mRadioDoing,mRadioTodo,mRadioDone;
+    private ImageView mImageTakePicture,mImageTaskPicture;
+    private File mPhotoFile;
+
     private Task mTask;
     private Calendar mCalendar = Calendar.getInstance();
     private Repository mRepository=Repository.getInstance();
@@ -71,6 +88,9 @@ public class Custom_DialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        createTask();
+        mPhotoFile = mRepository.getPhotoFile(mTask);
 
     }
 
@@ -99,6 +119,12 @@ public class Custom_DialogFragment extends DialogFragment {
             Calendar userSelectedTime = (Calendar) data.getSerializableExtra(TimePickerFragment.EXTRA_USER_SELECTED_TIME);
             updateTaskTime(userSelectedTime.getTime());
         }
+        else if (requestCode == REQUEST_CODE_IMAGE_CAPTURE) {
+            Uri photoUri = generateUriForPhotoFile();
+            getActivity().revokeUriPermission(photoUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+            updatePhotoView();
+        }
     }
 
     @Override
@@ -120,6 +146,8 @@ public class Custom_DialogFragment extends DialogFragment {
         mRadioDoing = view.findViewById(R.id.Radio_doing);
         mRadioDone = view.findViewById(R.id.Radio_done);
         mRadioTodo = view.findViewById(R.id.Radio_todo);
+        mImageTaskPicture = view.findViewById(R.id.task_picture_insert);
+        //mImageTakePicture = view.findViewById(R.id.btn_picture_insert);
     }
 
     private void setListeners() {
@@ -172,6 +200,48 @@ public class Custom_DialogFragment extends DialogFragment {
                 dismiss();
             }
         });
+
+        mImageTakePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                takePictureIntent();
+
+            }
+        });
+
+    }
+
+    private void takePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            if (mPhotoFile != null && takePictureIntent
+                    .resolveActivity(getActivity().getPackageManager()) != null) {
+
+                // file:///data/data/com.example.ci/files/234234234234.jpg
+                Uri photoUri = generateUriForPhotoFile();
+
+                grantWriteUriToAllResolvedActivities(takePictureIntent, photoUri);
+
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(takePictureIntent, REQUEST_CODE_IMAGE_CAPTURE);
+            }
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+    }
+
+    private void grantWriteUriToAllResolvedActivities(Intent takePictureIntent, Uri photoUri) {
+        List<ResolveInfo> activities = getActivity().getPackageManager()
+                .queryIntentActivities(
+                        takePictureIntent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+
+        for (ResolveInfo activity: activities) {
+            getActivity().grantUriPermission(
+                    activity.activityInfo.packageName,
+                    photoUri,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        }
     }
 
     private boolean validInput() {
@@ -183,16 +253,37 @@ public class Custom_DialogFragment extends DialogFragment {
             return false;
     }
 
+    private void updatePhotoView() {
+        if (mPhotoFile == null || !mPhotoFile.exists())
+            return;
+
+
+        //this has a better memory management.
+        Bitmap bitmap = com.example.hw11.utils.PictureUtils.getScaledBitmap(mPhotoFile.getAbsolutePath(), getActivity());
+        mImageTaskPicture.setImageBitmap(bitmap);
+    }
+
+    private Uri generateUriForPhotoFile() {
+        return FileProvider.getUriForFile(
+                getContext(),
+                AUTHORITY,
+                mPhotoFile);
+    }
+
     private void sendResult() {
         Fragment fragment = getTargetFragment();
         int requestCode = getTargetRequestCode();
         int resultCode = RESULT_OK;
-        Intent intent = new Intent();
+        //cupdateTask();
+        insertTaskToRepository(mTask);
         createTask();
         updateTasks(mTask);
         //extractDateFromDatePicker();
         //intent.putExtra(EXTRA_USER_SELECTED_DATE, userSelectedDate);
 
+        //fragment.onActivityResult(requestCode, resultCode, intent);
+
+        Intent intent = new Intent();
         getTargetFragment().onActivityResult(getTargetRequestCode(), RESULT_OK, intent);
     }
 
@@ -205,6 +296,10 @@ public class Custom_DialogFragment extends DialogFragment {
         else if (mRadioDone.isChecked())
             state = "Done";
         mTask = new Task(mEdtTitle.getText().toString(),mEdtDescript.getText().toString(),state,mCalendar.getTime());
+    }
+
+    private void insertTaskToRepository(Task task) {
+        mRepository.insertTask(task);
     }
 
     private void updateTasks(Task task) {
