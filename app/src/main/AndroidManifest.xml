@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.hw11">
 
-    <uses-feature android:name="android.hardware.camera"
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
 
     <uses-permission android:name="android.permission.CAMERA" />
@@ -14,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".controller.activity.SignUpActivity"></activity>
+        <activity android:name=".controller.activity.SingleFragmentActivity"></activity>
+        <activity android:name=".controller.activity.AdminActivity"></activity>
+        <activity android:name=".controller.activity.SignUpActivity" />
         <activity android:name=".controller.activity.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,7 +27,7 @@
         </activity>
         <activity android:name=".controller.activity.SearchActivity" />
         <activity android:name=".controller.activity.TaskDetailActivity" />
-        <activity android:name=".controller.activity.TaskPagerActivity"/>
+        <activity android:name=".controller.activity.TaskPagerActivity" />
     </application>
 
 </manifest>

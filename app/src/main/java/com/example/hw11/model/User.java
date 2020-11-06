@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 @Entity(tableName = "userTable")
 public class User {
 
@@ -16,6 +18,17 @@ public class User {
 
     @ColumnInfo(name = "password")
     private String mPassword;
+
+    @ColumnInfo(name = "date")
+    private Date mDate;
+
+    public Date getDate() {
+        return mDate;
+    }
+
+    public void setDate(Date date) {
+        mDate = date;
+    }
 
     public long getPrimaryId() {
         return primaryId;
@@ -44,5 +57,7 @@ public class User {
     public User(String username, String password) {
         mUsername = username;
         mPassword = password;
+        mDate = new Date();
+
     }
 }

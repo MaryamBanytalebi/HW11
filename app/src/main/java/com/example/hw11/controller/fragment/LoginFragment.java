@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.hw11.R;
+import com.example.hw11.controller.activity.AdminActivity;
 import com.example.hw11.controller.activity.SignUpActivity;
 import com.example.hw11.controller.activity.TaskPagerActivity;
 import com.example.hw11.model.User;
@@ -31,7 +32,7 @@ public class LoginFragment extends Fragment {
 
     public static final String BUNDLE_KEY_USERNAME = "UserBundle";
     public static final String BUNDLE_KEY_PASSWORD = "passBundle";
-    private Button mButtonLogin, mButtonSignUp;
+    private Button mButtonLogin, mButtonSignUp,mButtonAdmin;
     public static final int REQUEST_CODE_SIGN_UP = 0;
     private String user, pass;
 //    private ViewGroup mViewGroupRootLayout;
@@ -118,7 +119,29 @@ public class LoginFragment extends Fragment {
             }
         });
 
+        mButtonAdmin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (checkAdmin()){
+                    Intent intent = AdminActivity.newIntent(getActivity());
+                    startActivity(intent);
+                }
+
+            }
+        });
+
     }
+
+    private boolean checkAdmin() {
+        if (mUsername.getText().toString().equalsIgnoreCase("Admin") && mPassword.getText().toString().equals("1234"))
+            return true;
+        else {
+            callToast(R.string.toast_admin);
+            return false;
+        }
+    }
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private boolean validateInput() {
@@ -162,6 +185,8 @@ public class LoginFragment extends Fragment {
         mPasswordForm = view.findViewById(R.id.password_form_login);
         mUsername = view.findViewById(R.id.username_login);
         mPassword = view.findViewById(R.id.password_login);
+        mButtonAdmin = view.findViewById(R.id.btn_admin_login);
+
 //        mViewGroupRootLayout = view.findViewById(R.id.rootLayout);
 
     }
