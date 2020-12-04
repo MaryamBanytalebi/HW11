@@ -2,12 +2,10 @@ package com.example.hw11.controller.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -17,9 +15,9 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.hw11.R;
-import com.example.hw11.controller.activity.AdminActivity;
+import com.example.hw11.controller.activity.AdminListActivity;
 import com.example.hw11.controller.activity.SignUpActivity;
-import com.example.hw11.controller.activity.TaskPagerActivity;
+import com.example.hw11.controller.activity.TaskListActivity;
 import com.example.hw11.model.User;
 import com.example.hw11.repository.UserDBRepository;
 import com.google.android.material.textfield.TextInputEditText;
@@ -42,6 +40,7 @@ public class LoginFragment extends Fragment {
     private TextInputEditText mUsername;
     private TextInputEditText mPassword;
     private UserDBRepository mUserRepository;
+    private User mUser;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -97,17 +96,16 @@ public class LoginFragment extends Fragment {
 
     private void listeners() {
         mButtonLogin.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View view) {
                 mUsernameForm.setErrorEnabled(false);
                 mPasswordForm.setErrorEnabled(false);
                 if (validateInput()) {
-                    Intent intent = TaskPagerActivity.newIntent(getActivity(), mUsername.getText().toString());
+                    //todo.................
+                    //send user against username
+                    Intent intent = TaskListActivity.newIntent(getActivity(), mUsername.getText().toString(),mPassword.getText().toString());
                     startActivity(intent);
                 }
-
-
             }
         });
         mButtonSignUp.setOnClickListener(new View.OnClickListener() {
@@ -118,12 +116,11 @@ public class LoginFragment extends Fragment {
 
             }
         });
-
         mButtonAdmin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (checkAdmin()){
-                    Intent intent = AdminActivity.newIntent(getActivity());
+                    Intent intent = AdminListActivity.newIntent(getActivity());
                     startActivity(intent);
                 }
 
@@ -135,17 +132,14 @@ public class LoginFragment extends Fragment {
     private boolean checkAdmin() {
         if (mUsername.getText().toString().equalsIgnoreCase("Admin") && mPassword.getText().toString().equals("1234"))
             return true;
-        else {
+        else{
             callToast(R.string.toast_admin);
             return false;
         }
     }
 
-
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private boolean validateInput() {
-        User user = mUserRepository.getUser(Objects.requireNonNull(mUsername.getText()).toString());
+        User user = mUserRepository.getUser(mUsername.getText().toString(),mPassword.getText().toString());
         if (mUsername.getText().toString().trim().isEmpty() && mPassword.getText().toString().trim().isEmpty()) {
             mUsernameForm.setErrorEnabled(true);
             mUsernameForm.setError("Field cannot be empty!");
@@ -186,9 +180,6 @@ public class LoginFragment extends Fragment {
         mUsername = view.findViewById(R.id.username_login);
         mPassword = view.findViewById(R.id.password_login);
         mButtonAdmin = view.findViewById(R.id.btn_admin_login);
-
-//        mViewGroupRootLayout = view.findViewById(R.id.rootLayout);
-
     }
 
     private void callToast(int stringId) {

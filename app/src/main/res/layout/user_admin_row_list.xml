@@ -11,7 +11,7 @@
         android:id="@+id/detail_layout"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_toLefttOf="@id/user_layout"
+        android:layout_toLeftOf="@id/user_layout"
         android:orientation="horizontal">
 
         <TextView

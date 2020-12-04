@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.example.hw11.model.Task;
@@ -21,10 +22,10 @@ public interface TaskDataBaseDAO {
     void insertTask(Task task);
 
     @Insert
-    void insertTasks(Task... tasks);
+    void insertTasks(List<Task> tasks);
 
     @Delete
-    void deletTask(Task task);
+    void deleteTask(Task task);
 
     @Query("DELETE FROM taskTable")
     void deleteAllTask();
@@ -32,32 +33,41 @@ public interface TaskDataBaseDAO {
     @Query("SELECT * FROM taskTable")
     List<Task> getTasks();
 
+    @Query("SELECT * FROM taskTable WHERE state ='Todo' AND user_id_fk=:userId")
+    List<Task> getTodoTask(long userId);
+
+    @Query("SELECT * FROM taskTable WHERE state ='Doing' AND user_id_fk=:userId")
+    List<Task> getDoingTask(long userId);
+
+    @Query("SELECT * FROM taskTable WHERE state ='Done' AND user_id_fk=:userId")
+    List<Task> getDoneTask(long userId);
+
     @Query("SELECT * FROM taskTable WHERE uuid =:inputUUID")
     Task getTask(UUID inputUUID);
 
-    @Query("SELECT * FROM taskTable WHERE title LIKE :searchValue OR description LIKE :searchValue OR date LIKE :searchValue")
-    List<Task> searchTasks(String searchValue);
-
-   /* @Query("SELECT * FROM taskTable WHERE state LIKE :state ")
-    List<Task> getTasks(String state);*/
-
-    @Query("SELECT * FROM taskTable WHERE state ='Todo'")
-    List<Task> getTodoTask();
-
-    @Query("SELECT * FROM taskTable WHERE state ='Doing'")
-    List<Task> getDoingTask();
-
-    @Query("SELECT * FROM taskTable WHERE state ='Done'")
-    List<Task> getDoneTask();
+    @Query("SELECT * FROM taskTable WHERE user_id_fk=:userId AND title LIKE :searchValue OR description LIKE :searchValue OR date LIKE :searchValue")
+    List<Task> searchTasks(String searchValue,long userId);
 
     @Insert
     void insertUser(User user);
 
+    @Delete
+    void deleteUser(User user);
+
+    @Query("DELETE FROM taskTable WHERE user_id_fk=:userId")
+    void deleteUserTasks(long userId);
+
+    @Query("SELECT * FROM taskTable WHERE user_id_fk=:userId")
+    List<Task> getUserTasks (long userId);
+
     @Query("SELECT * FROM userTable")
     List<User> getUsers();
 
-    @Query("SELECT * FROM userTable WHERE  username=:name")
-    User getUser(String name);
+    @Query("SELECT * FROM userTable WHERE  username=:name AND password=:pass")
+    User getUser(String name,String pass);
+
+    @Query("SELECT COUNT(*) FROM taskTable WHERE user_id_fk=:userId GROUP BY user_id_fk")
+    int numberOfTask(long userId);
 
 
 }

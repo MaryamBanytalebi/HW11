@@ -74,7 +74,6 @@ public class SignUpFragment extends Fragment {
 
     private void listener() {
         mBtnSignUp.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View view) {
                 mUsernameForm.setErrorEnabled(false);
@@ -89,10 +88,9 @@ public class SignUpFragment extends Fragment {
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void setUserPassResult() {
-        String username = Objects.requireNonNull(mUsername.getText()).toString();
-        String password = Objects.requireNonNull(mPassword.getText()).toString();
+        String username = mUsername.getText().toString();
+        String password = mPassword.getText().toString();
         User user = new User(username,password);
         mUserRepository.insertUser(user);
         Intent intent = new Intent();

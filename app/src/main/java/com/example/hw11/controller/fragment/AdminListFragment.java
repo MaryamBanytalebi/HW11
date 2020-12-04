@@ -1,5 +1,6 @@
 package com.example.hw11.controller.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,30 +11,42 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.hw11.R;
+import com.example.hw11.SwipeableRecyclerView;
+import com.example.hw11.controller.activity.AdminDetailActivity;
+import com.example.hw11.model.Task;
 import com.example.hw11.model.User;
+import com.example.hw11.repository.IRepositry;
 import com.example.hw11.repository.IUserRepository;
+import com.example.hw11.repository.TaskDBRepository;
 import com.example.hw11.repository.UserDBRepository;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class AdminFragment extends Fragment {
+public class AdminListFragment extends Fragment {
 
+    public static final int REQUEST_CODE_USER_TASK_DETAIL = 0;
     private RecyclerView mRecyclerView;
     private UserAdapter mAdapter;
     private List<User> mUsers;
+    private User mUserUndo;
+    private List<Task> mUserTasks;
     private IUserRepository mIUserRepository;
+    private IRepositry mIRepository;
+    private RelativeLayout mRelativeLayout;
 
-    public AdminFragment() {
+    public AdminListFragment() {
         // Required empty public constructor
     }
 
-    public static AdminFragment newInstance() {
-        AdminFragment fragment = new AdminFragment();
+    public static AdminListFragment newInstance() {
+        AdminListFragment fragment = new AdminListFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -43,7 +56,8 @@ public class AdminFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mIUserRepository = UserDBRepository.getInstance(getActivity());
-        mUsers = mIUserRepository.getUsers();
+        mIRepository = TaskDBRepository.getInstance(getActivity());
+//        mUsers = mIUserRepository.getUsers();
 
     }
 
@@ -51,7 +65,7 @@ public class AdminFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_admin, container, false);
+        View view = inflater.inflate(R.layout.fragment_admin_list, container, false);
         findView(view);
         initView();
         return view;
@@ -59,15 +73,57 @@ public class AdminFragment extends Fragment {
 
     private void initView() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        swipeRecycler();
         updateUI();
+    }
+
+    private void swipeRecycler() {
+        /*  set swipe touch listener */
+        SwipeableRecyclerView swipeTouchListener = new
+                SwipeableRecyclerView(mRecyclerView,
+                new SwipeableRecyclerView.SwipeListener() {
+
+                    @Override
+                    public boolean canSwipeRight(int position) {
+                        //enable/disable right swipe on checkbox base else use true/false
+                        return true;
+                    }
+
+                    @Override
+                    public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                        //on recycler view swipe right dismiss update adapter
+                        onRecyclerViewDismiss(reverseSortedPositions, mUsers);
+                    }
+                });
+
+        //add item touch listener to recycler view
+        mRecyclerView.addOnItemTouchListener(swipeTouchListener);
+    }
+
+    private void onRecyclerViewDismiss(int[] reverseSortedPositions, List<User> users) {
+        for (int position : reverseSortedPositions) {
+            mUserUndo = users.get(position);
+            mIUserRepository.deleteUser(users.get(position));
+            mUserTasks = mIUserRepository.getUserTasks(users.get(position).getPrimaryId());
+            mIUserRepository.deleteUserTasks(users.get(position).getPrimaryId());
+        }
+        updateUI();
+        showSnackBar();
+    }
+
+    private void showSnackBar() {
+        Snackbar snackbar = Snackbar.make(mRelativeLayout, R.string.user_dismiss_success, Snackbar.LENGTH_SHORT);
+        snackbar.setAction(R.string.user_dismiss_undo, new MyUndoListener());
+        snackbar.show();
     }
 
     private void findView(View view) {
         mRecyclerView = view.findViewById(R.id.recycler_admin);
+        mRelativeLayout = view.findViewById(R.id.admin_layout);
     }
 
     private void updateUI() {
-
+        mUsers = mIUserRepository.getUsers();
         if (mAdapter == null) {
             mAdapter = new UserAdapter(mUsers);
             mRecyclerView.setAdapter(mAdapter);
@@ -82,19 +138,29 @@ public class AdminFragment extends Fragment {
         private TextView mTextViewUserName;
         private TextView mTextViewRegistry;
         private TextView mTextViewNumberOfTasks;
+        private User mUser;
 
         public UserHolder(@NonNull View itemView) {
             super(itemView);
             mTextViewUserName = itemView.findViewById(R.id.user_name);
             mTextViewRegistry = itemView.findViewById(R.id.registry_date);
             mTextViewNumberOfTasks = itemView.findViewById(R.id.number_of_tasks);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = AdminDetailActivity.newIntent(getActivity(),mUser.getPrimaryId());
+                    startActivity(intent);
+                }
+            });
         }
 
         public void bindUserDetail(User user){
+            mUser = user;
             DateFormat dateFormat = getDateFormat();
             String date = dateFormat.format(user.getDate());
             mTextViewUserName.setText(user.getUsername());
             mTextViewRegistry.setText(date);
+            mTextViewNumberOfTasks.setText(mIUserRepository.numberOfTask(user.getPrimaryId()) + "");
 
         }
 
@@ -138,6 +204,16 @@ public class AdminFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mUsers.size();
+        }
+    }
+
+    public class MyUndoListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            mIUserRepository.insertUser(mUserUndo);
+            mIRepository.insertTasks(mUserTasks);
+            updateUI();
         }
     }
 }

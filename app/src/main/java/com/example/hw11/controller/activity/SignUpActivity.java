@@ -13,27 +13,7 @@ import com.example.hw11.controller.fragment.LoginFragment;
 import com.example.hw11.controller.fragment.SearchFragment;
 import com.example.hw11.controller.fragment.SignUpFragment;
 
-public class SignUpActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_search);
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
-
-        if (fragment == null){
-            SignUpFragment signUpFragment = SignUpFragment.newInstance(getIntent().getExtras().getString(EXTRA_USERNAME),
-                    getIntent().getExtras().getString(EXTRA_PASSWORD));
-            fragmentManager
-                    .beginTransaction()
-                    .add(R.id.fragment_container,signUpFragment)
-                    .commit();
-
-        }
-    }
+public class SignUpActivity extends SingleFragmentActivity {
 
     public static final String EXTRA_USERNAME = "org.maktab.homework11_maktab37.controller.activity.extra_username";
     public static final String EXTRA_PASSWORD = "org.maktab.homework11_maktab37.controller.activity.extra_password";
@@ -46,5 +26,11 @@ public class SignUpActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_USERNAME,username);
         intent.putExtra(EXTRA_PASSWORD,password);
         return intent;
+    }
+
+    @Override
+    public Fragment createFragment() {
+        SignUpFragment signUpFragment = SignUpFragment.newInstance(mGetExtraUsername,mGetExtraPassword);
+        return signUpFragment;
     }
 }

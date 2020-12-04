@@ -49,30 +49,8 @@ public class TaskDBRepository implements IRepositry {
     }
 
     @Override
-    public List<Task> searchTasks(String searchValue) {
-        return mTaskDAO.searchTasks(searchValue);
-    }
-
-    @Override
-    public List<Task> getTodoTask() { return mTaskDAO.getTodoTask(); }
-
-    @Override
-    public List<Task> getDoingTask() {
-        return mTaskDAO.getDoingTask();
-    }
-
-    @Override
-    public List<Task> getDoneTask() {
-        return mTaskDAO.getDoneTask();
-    }
-
-    @Override
-    public File getPhotoFile(Task task) {
-        File filesDir = mContext.getFilesDir();
-
-        // /data/data/com.example.criminalintent/files/IMG_ktui4u544nmkfuy48485.jpg
-        File photoFile = new File(filesDir, task.getPhotoFileName());
-        return photoFile;
+    public List<Task> searchTasks(String searchValue,long userId) {
+        return mTaskDAO.searchTasks(searchValue,userId);
     }
 
     @Override
@@ -86,13 +64,49 @@ public class TaskDBRepository implements IRepositry {
     }
 
     @Override
+    public void insertTasks(List<Task> tasks) {
+        mTaskDAO.insertTasks(tasks);
+    }
+
+    @Override
     public void updateTask(Task task) {
         mTaskDAO.updateTask(task);
     }
 
     @Override
     public void deletTask(Task task) {
-        mTaskDAO.deletTask(task);
+        mTaskDAO.deleteTask(task);
     }
+
+    @Override
+    public void deleteAllTask() {
+        mTaskDAO.deleteAllTask();
+    }
+
+    @Override
+    public List<Task> getTodoTask(long userId) {
+        return mTaskDAO.getTodoTask(userId);
+    }
+
+    @Override
+    public List<Task> getDoingTask(long userId) {
+        return mTaskDAO.getDoingTask(userId);
+    }
+
+    @Override
+    public List<Task> getDoneTask(long userId) {
+        return mTaskDAO.getDoneTask(userId);
+    }
+
+    @Override
+    public File getPhotoFile(Task task) {
+        // /data/data/com.example.criminalintent/files/
+        File filesDir = mContext.getFilesDir();
+
+        // /data/data/com.example.criminalintent/files/IMG_ktui4u544nmkfuy48485.jpg
+        File photoFile = new File(filesDir, task.getPhotoFileName());
+        return photoFile;
+    }
+
 
 }

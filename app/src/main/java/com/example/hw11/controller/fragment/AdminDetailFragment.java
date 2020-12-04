@@ -1,9 +1,12 @@
 package com.example.hw11.controller.fragment;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,33 +20,30 @@ import android.widget.TextView;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.example.hw11.R;
 import com.example.hw11.model.Task;
-import com.example.hw11.repository.IRepositry;
-import com.example.hw11.repository.TaskDBRepository;
-import com.google.android.material.textfield.TextInputEditText;
+import com.example.hw11.repository.IUserRepository;
+import com.example.hw11.repository.UserDBRepository;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class SearchFragment extends Fragment {
+public class AdminDetailFragment extends Fragment {
 
-    public static final String FRAGMENT_TAG_EDIT_TASK = "EditTask";
+    public static final String FRAGMENT_TAG_EDIT_TASK = "AdminEditTasks";
     public static final int REQUEST_CODE_EDIT_TASK = 0;
     public static final String ARG_USER_ID = "Arg_userId";
-    private IRepositry mRepository;
-    private RecyclerView mRecyclerView;
-    private SearchAdapter mAdapter;
-    private List<Task> mTasks;
-    private TextInputEditText mEditTextSearch;
-    private ImageView mImageViewSearch;
-    private long mUserId;
 
-    public SearchFragment() {
+    private RecyclerView mRecyclerView;
+    private UserTasksAdapter mAdapter;
+    private IUserRepository mRepository;
+    private List<Task> mTasks;
+    private long mUserId;
+    public AdminDetailFragment() {
         // Required empty public constructor
     }
 
-    public static SearchFragment newInstance(long userId) {
-        SearchFragment fragment = new SearchFragment();
+    public static AdminDetailFragment newInstance(long userId) {
+        AdminDetailFragment fragment = new AdminDetailFragment();
         Bundle args = new Bundle();
         args.putLong(ARG_USER_ID,userId);
         fragment.setArguments(args);
@@ -51,54 +51,51 @@ public class SearchFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRepository = TaskDBRepository.getInstance(getActivity());
+        mRepository = UserDBRepository.getInstance(getActivity());
         mUserId = getArguments().getLong(ARG_USER_ID);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_search, container, false);
-
-        findView(view);
-        listener();
+        View view = inflater.inflate(R.layout.fragment_admin_detail, container, false);
+        findViews(view);
+        initViews();
         return view;
     }
 
-    private void listener() {
-        mImageViewSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                search();
-                initView();
-            }
-        });
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode != Activity.RESULT_OK || data == null)
+            return;
+
+        if (requestCode == REQUEST_CODE_EDIT_TASK) {
+            updateUI();
+        }
     }
 
-    private void findView(View view) {
-        mRecyclerView = view.findViewById(R.id.recycler_search);
-        mEditTextSearch = view.findViewById(R.id.search);
-        mImageViewSearch = view.findViewById(R.id.search_img);
+    private void findViews(View view) {
+        mRecyclerView = view.findViewById(R.id.recycler_user_tasks);
     }
 
-    private void initView() {
+    private void initViews() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         updateUI();
     }
 
-    private void search() {
-        String search = "%" + mEditTextSearch.getText() + "%";
-        mTasks = mRepository.searchTasks(search,mUserId);
-    }
-
     private void updateUI() {
-
+        mTasks = mRepository.getUserTasks(mUserId);
         if (mAdapter == null) {
-            mAdapter = new SearchAdapter(mTasks);
+            mAdapter = new UserTasksAdapter(mTasks);
             mRecyclerView.setAdapter(mAdapter);
         }
         else {
@@ -107,13 +104,13 @@ public class SearchFragment extends Fragment {
         }
     }
 
-    private class SearchHolder extends RecyclerView.ViewHolder {
+    private class UserTasksHolder extends RecyclerView.ViewHolder {
         private TextView mTextViewTitle;
         private TextView mTextViewDate;
         private ImageView mImageViewProfile;
         private Task mTask;
 
-        public SearchHolder(@NonNull View itemView) {
+        public UserTasksHolder(@NonNull View itemView) {
             super(itemView);
             mTextViewTitle = itemView.findViewById(R.id.task_title);
             mTextViewDate = itemView.findViewById(R.id.task_date);
@@ -122,10 +119,10 @@ public class SearchFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
 
-                    EditTaskFragment editTaskFragment = EditTaskFragment.newInstance(mTask.getId(),true);
+                    EditTaskFragment editTaskFragment = EditTaskFragment.newInstance(mTask.getId(),false);
 
                     editTaskFragment.setTargetFragment(
-                            SearchFragment.this,
+                            AdminDetailFragment.this,
                             REQUEST_CODE_EDIT_TASK);
 
                     editTaskFragment.show(
@@ -135,7 +132,7 @@ public class SearchFragment extends Fragment {
             });
         }
 
-        public void bindTaskSearch(Task task) {
+        public void bindUserTasks(Task task) {
             mTask = task;
             mTextViewTitle.setText(task.getTitle());
             String date = createDateFormat(task);
@@ -148,28 +145,19 @@ public class SearchFragment extends Fragment {
         }
 
         private String createDateFormat (Task task){
-            String totalDate = "";
             DateFormat dateFormat = getDateFormat();
             String date = dateFormat.format(task.getDate());
 
-            DateFormat timeFormat = getTimeFormat();
-            String time = timeFormat.format(task.getDate());
-
-            totalDate = date + "  " + time;
-
-            return totalDate;
+            return date;
         }
 
         private DateFormat getDateFormat() {
-            return new SimpleDateFormat("MMM dd,yyyy");
+            return new SimpleDateFormat("MMM dd,yyyy h:mm a");
         }
 
-        private DateFormat getTimeFormat() {
-            return new SimpleDateFormat("h:mm a");
-        }
     }
 
-    private class SearchAdapter extends RecyclerView.Adapter<SearchHolder> {
+    private class UserTasksAdapter extends RecyclerView.Adapter<UserTasksHolder> {
 
         private List<Task> mTasks;
 
@@ -181,7 +169,7 @@ public class SearchFragment extends Fragment {
             mTasks = tasks;
         }
 
-        public SearchAdapter(List<Task> tasks) {
+        public UserTasksAdapter(List<Task> tasks) {
             mTasks = tasks;
         }
 
@@ -192,20 +180,20 @@ public class SearchFragment extends Fragment {
 
         @NonNull
         @Override
-        public SearchHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public UserTasksHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View view = layoutInflater.inflate(R.layout.fragment_task_row_list,parent,false);
-            SearchHolder searchHolder = new SearchHolder(view);
-            return searchHolder;
+            UserTasksHolder userTasksHolder = new UserTasksHolder(view);
+            return userTasksHolder;
         }
 
         @Override
-        public void onBindViewHolder(@NonNull SearchHolder holder, int position) {
+        public void onBindViewHolder(@NonNull UserTasksHolder holder, int position) {
 
             Task task = mTasks.get(position);
 
-            holder.bindTaskSearch(task);
+            holder.bindUserTasks(task);
         }
 
     }
